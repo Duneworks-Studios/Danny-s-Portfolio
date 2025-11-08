@@ -1,16 +1,20 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Play, Pause, Volume2, VolumeX, Music, SkipBack, SkipForward, RotateCcw } from 'lucide-react';
+
+export interface MusicPlayerHandle {
+  play: () => Promise<void>;
+  pause: () => void;
+}
 
 interface MusicPlayerProps {
   src: string;
   autoPlay?: boolean;
   loop?: boolean;
 }
-
-export default function MusicPlayer({ src, autoPlay = false, loop = true }: MusicPlayerProps) {
+const MusicPlayer = forwardRef<MusicPlayerHandle, MusicPlayerProps>(({ src, autoPlay = false, loop = true }, ref) => {
   const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [volume, setVolume] = useState(0.3);
   const [isMuted, setIsMuted] = useState(false);
@@ -20,16 +24,10 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSettings, setShowSettings] = useState(false);
-  const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
   const [isSeeking, setIsSeeking] = useState(false);
-  const autoPlayAttemptedRef = useRef(false);
-
-  useEffect(() => {
-    autoPlayAttemptedRef.current = false;
-  }, [src]);
 
   // Initialize Web Audio API
   useEffect(() => {
@@ -67,65 +65,72 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
     };
   }, [src]);
 
-  // Define all control functions using useCallback
-  const togglePlayPause = useCallback(async () => {
+  const pauseAudio = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) {
       console.error('Audio element not found');
       return;
     }
 
-    console.log('Toggle play/pause clicked, current state:', isPlaying);
-    console.log('Audio readyState:', audio.readyState);
-    console.log('Audio src:', audio.src);
-    
-    if (isPlaying) {
-      audio.pause();
-      if (sourceRef.current) {
-        sourceRef.current.stop();
-        sourceRef.current = null;
+    audio.pause();
+    if (sourceRef.current) {
+      sourceRef.current.stop();
+      sourceRef.current = null;
+    }
+    setIsPlaying(false);
+    console.log('Audio paused');
+  }, []);
+
+  const playAudio = useCallback(async () => {
+    const audio = audioRef.current;
+    if (!audio) {
+      console.error('Audio element not found');
+      return;
+    }
+
+    try {
+      if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+        await audioContextRef.current.resume();
+        console.log('AudioContext resumed');
       }
-      setIsPlaying(false);
-      console.log('Audio paused');
-    } else {
+
+      await audio.play();
+      console.log('Audio play successful');
+      setIsPlaying(true);
+      setIsLoaded(true);
+    } catch (error) {
+      console.error('Play failed:', error);
       try {
-        // Ensure audio context is resumed if suspended
-        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-          await audioContextRef.current.resume();
-          console.log('AudioContext resumed');
+        if (audioContextRef.current) {
+          const response = await fetch(src, { cache: 'force-cache' });
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
+
+          const source = audioContextRef.current.createBufferSource();
+          source.buffer = audioBuffer;
+          source.loop = loop;
+          source.connect(audioContextRef.current.destination);
+          source.start();
+
+          sourceRef.current = source;
+          console.log('Web Audio API play successful');
+          setIsPlaying(true);
+          setIsLoaded(true);
         }
-        
-        await audio.play();
-        console.log('Audio play successful');
-        setIsPlaying(true);
-        setIsLoaded(true);
-      } catch (error) {
-        console.error('Play failed:', error);
-        // Try Web Audio API fallback
-        try {
-          if (audioContextRef.current) {
-            const response = await fetch(src);
-            const arrayBuffer = await response.arrayBuffer();
-            const audioBuffer = await audioContextRef.current.decodeAudioData(arrayBuffer);
-            
-            const source = audioContextRef.current.createBufferSource();
-            source.buffer = audioBuffer;
-            source.loop = loop;
-            source.connect(audioContextRef.current.destination);
-            source.start();
-            
-            sourceRef.current = source;
-            console.log('Web Audio API play successful');
-            setIsPlaying(true);
-            setIsLoaded(true);
-          }
-        } catch (webAudioError) {
-          console.error('Web Audio API play failed:', webAudioError);
-        }
+      } catch (webAudioError) {
+        console.error('Web Audio API play failed:', webAudioError);
       }
     }
-    // Remove manual state update - let audio events handle it
-  }, [isPlaying, src, loop]);
+  }, [loop, src]);
+
+  const togglePlayPause = useCallback(async () => {
+    console.log('Toggle play/pause clicked, current state:', isPlaying);
+    if (isPlaying) {
+      pauseAudio();
+    } else {
+      await playAudio();
+    }
+  }, [isPlaying, pauseAudio, playAudio]);
 
   const skipBack = useCallback(() => {
     const audio = audioRef.current;
@@ -169,6 +174,25 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
     audio.playbackRate = rate;
     setPlaybackRate(rate);
   };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      play: () => playAudio(),
+      pause: () => pauseAudio(),
+    }),
+    [playAudio, pauseAudio]
+  );
+
+  useEffect(() => {
+    if (autoPlay) {
+      playAudio().catch(console.error);
+    } else {
+      pauseAudio();
+    }
+    // Only run on mount or when autoPlay changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPlay]);
 
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
@@ -227,39 +251,6 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
       audio.removeEventListener('pause', handlePause);
     };
   }, [loop, isSeeking, isLoaded]);
-
-  // Attempt automatic playback when allowed
-  useEffect(() => {
-    if (!autoPlay || autoPlayAttemptedRef.current) return;
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const attemptPlay = async () => {
-      autoPlayAttemptedRef.current = true;
-      try {
-        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
-          await audioContextRef.current.resume();
-          console.log('AudioContext resumed (auto-play)');
-        }
-        await audio.play();
-        console.log('Auto-play successful');
-      } catch (error) {
-        console.warn('Auto-play blocked by browser:', error);
-        autoPlayAttemptedRef.current = false;
-      }
-    };
-
-    if (audio.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
-      attemptPlay();
-    } else {
-      const handleCanPlay = () => {
-        audio.removeEventListener('canplay', handleCanPlay);
-        attemptPlay();
-      };
-      audio.addEventListener('canplay', handleCanPlay);
-      return () => audio.removeEventListener('canplay', handleCanPlay);
-    }
-  }, [autoPlay, src]);
 
   // Keyboard shortcuts (global Spacebar to play/pause)
   useEffect(() => {
@@ -553,4 +544,6 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
       `}</style>
     </>
   );
-}
+});
+
+export default MusicPlayer;
