@@ -1,0 +1,215 @@
+/* Space Theme CSS Variables - Monochrome */
+:root {
+  /* Monochrome Colors */
+  --space-bg-primary: #1A1A1A;
+  --space-bg-secondary: #1A1A1A;
+  --space-bg-gradient-start: #1A1A1A;
+  --space-bg-gradient-end: #1A1A1A;
+  
+  /* Additional Theme Variables */
+  --ink: #FFFFFF;
+  --ink-dim: rgba(255, 255, 255, 0.72);
+  --border: rgba(255, 255, 255, 0.10);
+  --glass: rgba(0, 0, 0, 0.50);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --glow: 0 0 20px rgba(255, 255, 255, 0.35);
+  
+  /* Monochrome Accents */
+  --space-primary: #ffffff;
+  --space-primary-glow: rgba(255, 255, 255, 0.6);
+  --space-secondary: #cccccc;
+  --space-secondary-glow: rgba(204, 204, 204, 0.6);
+  --space-accent: #ffffff;
+  --space-accent-glow: rgba(255, 255, 255, 0.6);
+  
+  /* Monochrome Nebula */
+  --space-nebula-1: rgba(255, 255, 255, 0.05);
+  --space-nebula-2: rgba(200, 200, 200, 0.03);
+  --space-nebula-3: rgba(150, 150, 150, 0.02);
+  
+  /* Glass Effects */
+  --space-glass-bg: rgba(70, 70, 70, 0.7);
+  --space-glass-border: rgba(255, 255, 255, 0.2);
+  --space-glass-blur: blur(20px) saturate(100%);
+  
+  /* Text Colors */
+  --space-text-primary: #FFFFFF;
+  --space-text-secondary: rgba(255, 255, 255, 0.9);
+  --space-text-muted: rgba(255, 255, 255, 0.75);
+  
+  /* Shadows & Glows */
+  --space-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.5);
+  --space-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.6);
+  --space-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.7);
+  --space-glow-primary: 0 0 20px var(--space-primary-glow);
+  --space-glow-secondary: 0 0 20px var(--space-secondary-glow);
+}
+
+.space-theme {
+  min-height: 100vh;
+  background: var(--space-bg-primary, #1A1A1A);
+  color: var(--space-text-primary);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Monochrome nebula texture overlay */
+.space-theme::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 20% 30%, var(--space-nebula-1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, var(--space-nebula-2) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, var(--space-nebula-3) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  animation: nebulaFloat 20s ease-in-out infinite;
+}
+
+@keyframes nebulaFloat {
+  0%, 100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(20px, -20px) scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+/* Disable animations when animations-disabled class is present */
+.space-theme.animations-disabled *,
+.space-theme.animations-disabled *::before,
+.space-theme.animations-disabled *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .space-theme::before {
+    animation: none;
+    opacity: 0.4;
+  }
+  
+  .space-theme * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Space-themed glassmorphism */
+.space-glass {
+  background: var(--space-glass-bg);
+  backdrop-filter: var(--space-glass-blur);
+  -webkit-backdrop-filter: var(--space-glass-blur);
+  border: 1px solid var(--space-glass-border);
+  box-shadow: var(--space-shadow-md);
+}
+
+.space-glass-strong {
+  background: rgba(80, 80, 80, 0.8);
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: var(--space-shadow-lg);
+}
+
+.space-glass-light {
+  background: rgba(60, 60, 60, 0.6);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Space-themed buttons */
+.space-button {
+  background: var(--space-glass-bg);
+  backdrop-filter: var(--space-glass-blur);
+  border: 1px solid var(--space-primary);
+  color: var(--space-text-primary);
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.space-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.space-button:hover {
+  border-color: var(--space-primary);
+  box-shadow: var(--space-glow-primary);
+  transform: translateY(-2px);
+}
+
+.space-button:hover::before {
+  left: 100%;
+}
+
+.space-button:focus-visible {
+  outline: 2px solid var(--space-primary);
+  outline-offset: 2px;
+}
+
+/* Space-themed text gradients */
+.space-gradient-text {
+  background: linear-gradient(135deg, var(--space-primary) 0%, var(--space-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.space-gradient-text-accent {
+  background: linear-gradient(135deg, var(--space-accent) 0%, var(--space-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glow effects */
+.space-glow-primary {
+  box-shadow: var(--space-glow-primary);
+}
+
+.space-glow-secondary {
+  box-shadow: var(--space-glow-secondary);
+}
+
+.space-glow-accent {
+  box-shadow: 0 0 20px var(--space-accent-glow);
+}
+
+/* Performance mode indicators */
+[data-performance-mode="low"] .solar-system,
+[data-performance-mode="low"] .particles-canvas {
+  opacity: 0.3;
+}
+
+[data-performance-mode="medium"] .solar-system,
+[data-performance-mode="medium"] .particles-canvas {
+  opacity: 0.6;
+}
+
+[data-performance-mode="high"] .solar-system,
+[data-performance-mode="high"] .particles-canvas {
+  opacity: 1;
+}
+

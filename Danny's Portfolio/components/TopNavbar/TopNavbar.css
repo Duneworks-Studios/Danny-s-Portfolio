@@ -1,0 +1,229 @@
+.top-navbar {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+}
+
+.top-navbar-container {
+  height: 52px;
+  width: clamp(720px, 80vw, 1200px);
+  max-width: 100%;
+  border-radius: 9999px;
+  background: rgba(60, 60, 60, 0.7);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.2));
+  box-shadow: var(--shadow-lg, 0 8px 32px rgba(0, 0, 0, 0.6));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  gap: 16px;
+  pointer-events: auto;
+  transition: all 0.2s ease;
+}
+
+.top-navbar-items {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.top-navbar-items::-webkit-scrollbar {
+  display: none;
+}
+
+.top-navbar-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  color: rgba(255, 255, 255, 0.95);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  outline: none;
+}
+
+.top-navbar-item:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  transform: scale(1.04);
+}
+
+.top-navbar-item:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+  border-radius: 9999px;
+}
+
+.top-navbar-item.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.top-navbar-icon {
+  flex-shrink: 0;
+  opacity: 0.9;
+  transition: opacity 0.18s ease;
+}
+
+.top-navbar-item:hover .top-navbar-icon {
+  opacity: 1;
+}
+
+.top-navbar-label {
+  font-weight: 500;
+}
+
+.top-navbar-auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.top-navbar-auth-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.top-navbar-auth-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 9999px;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  outline: none;
+}
+
+.top-navbar-auth-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transform: scale(1.04);
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+}
+
+.top-navbar-auth-button:active {
+  transform: scale(0.97);
+}
+
+.top-navbar-auth-button:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
+}
+
+.top-navbar-login {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.top-navbar-login:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.top-navbar-logout {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.top-navbar-logout:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.top-navbar-loading {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .top-navbar {
+    top: 8px;
+    padding: 0 12px;
+  }
+
+  .top-navbar-container {
+    height: 48px;
+    padding: 0 12px;
+    gap: 8px;
+  }
+
+  .top-navbar-item {
+    padding: 6px 10px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .top-navbar-label {
+    display: none;
+  }
+
+  .top-navbar-icon {
+    margin: 0;
+  }
+
+  .top-navbar-auth-button {
+    padding: 6px 10px;
+    font-size: 13px;
+    gap: 4px;
+  }
+
+  .top-navbar-auth-button span {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .top-navbar-container {
+    width: calc(100% - 24px);
+  }
+
+  .top-navbar-items {
+    gap: 4px;
+  }
+
+  .top-navbar-item {
+    padding: 6px 8px;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .top-navbar-container,
+  .top-navbar-item,
+  .top-navbar-auth-button {
+    transition: none;
+  }
+
+  .top-navbar-item:hover,
+  .top-navbar-auth-button:hover {
+    transform: none;
+  }
+}
+

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "admin-main",
+    "email": "Duneworksstudios@gmail.com",
+    "password": "Duneworks2025",
+    "role": "admin",
+    "createdAt": "2024-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "1761576649596",
+    "email": "Goose@gmail.com",
+    "password": "Goose123",
+    "role": "admin",
+    "createdAt": "2025-10-27T14:50:49.596Z"
+  }
+]
