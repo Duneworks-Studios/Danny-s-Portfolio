@@ -15,7 +15,7 @@ interface SpaceLayoutProps {
   particleColors?: string[];
   solarSystemEnabled?: boolean;
   dockItems?: Array<{
-    icon?: React.ComponentType<{ size?: number; className?: string }>;
+    icon?: React.ComponentType<{ size?: string | number; className?: string }>;
     label: string;
     onClick?: () => void;
     href?: string;

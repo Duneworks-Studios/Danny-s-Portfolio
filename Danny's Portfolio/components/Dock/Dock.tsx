@@ -5,7 +5,7 @@ import { useState, useEffect, ReactNode } from 'react';
 import './Dock.css';
 
 interface DockItem {
-  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  icon?: React.ComponentType<{ size?: string | number; className?: string }>;
   label: string;
   onClick?: () => void;
   href?: string;
