@@ -53,7 +53,7 @@ const PLANETS: PlanetConfig[] = [
   {
     name: 'Sun',
     color: [0.2, 0.2, 0.2],
-    size: 4.6,
+    size: 6.2,
     distance: 0,
     rotationSpeed: 0.00025,
     glow: 24,
@@ -298,24 +298,24 @@ void main() {
   float stars = 0.0;
   stars += starField(starCoords, uTime * 0.6);
   stars += starField(starCoords * 1.3 + vec2(12.7), uTime * 0.8);
-  stars *= smoothstep(1.05, 0.3, radius);
+  stars *= smoothstep(1.1, 0.25, radius);
 
-  float intensity = clamp(glow + swirl * 0.12 + turbulence * 0.2, 0.0, 1.0);
-  vec3 rim = mix(vec3(0.01), vec3(0.22, 0.3, 0.44), clamp(glow * 1.6, 0.0, 1.0));
+  float intensity = clamp(glow + swirl * 0.08 + turbulence * 0.16, 0.0, 1.0);
+  vec3 rim = mix(vec3(0.0), vec3(0.1, 0.18, 0.26), clamp(glow * 1.4, 0.0, 1.0));
   vec3 voidColor = vec3(0.0);
 
-  vec3 starColor = vec3(0.85, 0.9, 1.0) * stars;
-  starColor *= smoothstep(0.12, 0.0, radius - 0.18);
+  vec3 starColor = vec3(0.35, 0.5, 0.8) * stars * 0.25;
+  starColor *= smoothstep(0.08, 0.0, radius - 0.14);
 
-  float alpha = clamp((1.0 - horizon) * (0.5 + glow * 0.6), 0.0, 1.0);
-  alpha = pow(alpha, 1.25);
+  float alpha = clamp((1.0 - horizon) * (0.85 + glow * 0.4), 0.0, 1.0);
+  alpha = pow(alpha, 1.4);
 
-  vec3 finalColor = mix(voidColor, rim, intensity * 0.55);
-  finalColor = mix(finalColor, vec3(0.004, 0.006, 0.012), 0.72);
+  vec3 finalColor = mix(voidColor, rim, intensity * 0.25);
+  finalColor = mix(finalColor, vec3(0.0, 0.0, 0.0), 0.92);
   finalColor += starColor;
   finalColor = clamp(finalColor, 0.0, 1.0);
 
-  gl_FragColor = vec4(finalColor, alpha);
+  gl_FragColor = vec4(finalColor, clamp(alpha, 0.92, 1.0));
 }
 `;
 
@@ -637,7 +637,7 @@ export default function SolarSystem({
         vertex,
         fragment: def.isBlackHole ? blackHoleFragment : fragment,
         uniforms: planetUniforms as unknown as Record<string, { value: any }>,
-        transparent: true,
+        transparent: !def.isBlackHole,
       });
 
       const mesh = new Mesh(gl, {
@@ -840,7 +840,8 @@ export default function SolarSystem({
         const diskAlphaUniform = planet.disk?.program.uniforms?.uAlpha as { value: number } | undefined;
         const ringAlphaUniform = planet.ring?.program.uniforms?.uAlpha as { value: number } | undefined;
 
-        const explosionActive = explosionModeRef.current && !isMobile;
+        const explosionActive =
+          !planet.def.isBlackHole && explosionModeRef.current && !isMobile;
         const planetScaleTarget = explosionActive ? 1.6 : 1;
         const scaleEase = 0.08;
         const currentScale = planet.mesh.scale.x;
@@ -866,16 +867,18 @@ export default function SolarSystem({
           }
         } else {
           planet.mesh.position.y += (0 - planet.mesh.position.y) * 0.1;
-          if (planet.uniforms?.uAlpha) {
-            planet.uniforms.uAlpha.value += (1 - planet.uniforms.uAlpha.value) * 0.05;
-          }
-          if (diskAlphaUniform) {
-            const targetDiskAlpha = planet.def.disk?.alpha ?? 0.9;
-            diskAlphaUniform.value += (targetDiskAlpha - diskAlphaUniform.value) * 0.05;
-          }
-          if (ringAlphaUniform) {
-            const targetAlpha = planet.def.rings?.color[3] ?? 0.4;
-            ringAlphaUniform.value += (targetAlpha - ringAlphaUniform.value) * 0.05;
+          if (!planet.def.isBlackHole) {
+            if (planet.uniforms?.uAlpha) {
+              planet.uniforms.uAlpha.value += (1 - planet.uniforms.uAlpha.value) * 0.05;
+            }
+            if (diskAlphaUniform) {
+              const targetDiskAlpha = planet.def.disk?.alpha ?? 0.9;
+              diskAlphaUniform.value += (targetDiskAlpha - diskAlphaUniform.value) * 0.05;
+            }
+            if (ringAlphaUniform) {
+              const targetAlpha = planet.def.rings?.color[3] ?? 0.4;
+              ringAlphaUniform.value += (targetAlpha - ringAlphaUniform.value) * 0.05;
+            }
           }
         }
 
