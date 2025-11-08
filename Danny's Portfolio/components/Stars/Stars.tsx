@@ -28,6 +28,7 @@ export default function Stars({
   useEffect(() => {
     const container = ref.current;
     if (!container) return;
+    const containerEl = container;
 
     const canvas = document.createElement('canvas');
     canvas.style.position = 'absolute';
@@ -44,8 +45,8 @@ export default function Stars({
     let dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     const resize = () => {
-      const w = container.clientWidth;
-      const h = container.clientHeight;
+      const w = containerEl.clientWidth;
+      const h = containerEl.clientHeight;
       canvas.width = Math.floor(w * dpr);
       canvas.height = Math.floor(h * dpr);
       canvas.style.width = `${w}px`;
@@ -59,8 +60,8 @@ export default function Stars({
       starsRef.current = new Array(amount).fill(0).map(() => {
         const r = Math.random();
         return {
-          x: Math.random() * container.clientWidth,
-          y: Math.random() * container.clientHeight,
+          x: Math.random() * containerEl.clientWidth,
+          y: Math.random() * containerEl.clientHeight,
           z: 0.1 + Math.random() * 1.5,
           size: 0.6 + r * 2.4,
           alpha: 0.5 + Math.random() * 0.5,
@@ -70,7 +71,7 @@ export default function Stars({
     }
 
     const handleMove = (e: MouseEvent) => {
-      const rect = container.getBoundingClientRect();
+      const rect = containerEl.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
       const y = -(((e.clientY - rect.top) / rect.height) * 2 - 1);
       const now = performance.now();
@@ -84,7 +85,7 @@ export default function Stars({
     };
 
     const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (!reduceMotion) container.addEventListener('mousemove', handleMove);
+    if (!reduceMotion) containerEl.addEventListener('mousemove', handleMove);
 
     let last = performance.now();
 
@@ -94,10 +95,10 @@ export default function Stars({
       const dt = Math.min(32, now - last);
       last = now;
 
-      ctx.clearRect(0, 0, container.clientWidth, container.clientHeight);
+      ctx.clearRect(0, 0, containerEl.clientWidth, containerEl.clientHeight);
 
-      const mx = mouse.current.x * parallaxStrength * container.clientWidth;
-      const my = mouse.current.y * parallaxStrength * container.clientHeight;
+      const mx = mouse.current.x * parallaxStrength * containerEl.clientWidth;
+      const my = mouse.current.y * parallaxStrength * containerEl.clientHeight;
 
       for (let s of starsRef.current) {
         // parallax offset
@@ -129,8 +130,8 @@ export default function Stars({
         cancelAnimationFrame(rafRef.current);
       }
       window.removeEventListener('resize', resize);
-      if (!reduceMotion) container.removeEventListener('mousemove', handleMove);
-      if (container.contains(canvas)) container.removeChild(canvas);
+      if (!reduceMotion) containerEl.removeEventListener('mousemove', handleMove);
+      if (containerEl.contains(canvas)) containerEl.removeChild(canvas);
     };
   }, [starCount, parallaxStrength, twinkle, deviceLowPower]);
 
