@@ -6,7 +6,7 @@ import { Home, Camera, Code, User, Mail, Palette, Shield } from 'lucide-react';
 import './TopNavbar.css';
 
 interface NavItem {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<{ size?: string | number; className?: string }>;
   label: string;
   href: string;
   ariaLabel?: string;
