@@ -85,6 +85,7 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
         sourceRef.current.stop();
         sourceRef.current = null;
       }
+      setIsPlaying(false);
       console.log('Audio paused');
     } else {
       try {
@@ -96,6 +97,8 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
         
         await audio.play();
         console.log('Audio play successful');
+        setIsPlaying(true);
+        setIsLoaded(true);
       } catch (error) {
         console.error('Play failed:', error);
         // Try Web Audio API fallback
@@ -113,6 +116,8 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
             
             sourceRef.current = source;
             console.log('Web Audio API play successful');
+            setIsPlaying(true);
+            setIsLoaded(true);
           }
         } catch (webAudioError) {
           console.error('Web Audio API play failed:', webAudioError);

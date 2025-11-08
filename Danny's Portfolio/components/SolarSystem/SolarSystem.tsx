@@ -46,100 +46,102 @@ interface PlanetConfig {
   detailStrength: number;
   bandStrength: number;
   specularStrength: number;
+  isBlackHole?: boolean;
 }
 
 const PLANETS: PlanetConfig[] = [
   {
     name: 'Sun',
-    color: [1.0, 0.88, 0.36],
-    size: 5.2,
+    color: [0.26, 0.08, 0.42],
+    size: 4.8,
     distance: 0,
     rotationSpeed: 0.00022,
-    glow: 10,
-    detailFrequency: 10,
-    detailStrength: 0.45,
-    bandStrength: 0.5,
-    specularStrength: 0.45,
+    glow: 18,
+    detailFrequency: 8,
+    detailStrength: 0.9,
+    bandStrength: 0.8,
+    specularStrength: 0.2,
+    isBlackHole: true,
     disk: {
-      inner: 6.2,
-      outer: 14.4,
-      alpha: 0.88,
-      glow: 3.2,
-      color: [1.25, 0.65, 0.25],
+      inner: 5.6,
+      outer: 14.8,
+      alpha: 0.95,
+      glow: 5.5,
+      color: [1.7, 0.55, 0.28],
       tilt: 0,
     },
   },
   {
     name: 'Mercury',
-    color: [0.76, 0.66, 0.56],
+    color: [0.58, 0.54, 0.51],
     size: 0.55,
     distance: 9,
     rotationSpeed: 0.0016,
-    glow: 2.2,
-    detailFrequency: 18,
-    detailStrength: 0.4,
-    bandStrength: 0.2,
-    specularStrength: 0.25,
+    glow: 1.4,
+    detailFrequency: 20,
+    detailStrength: 0.55,
+    bandStrength: 0.12,
+    specularStrength: 0.18,
   },
   {
     name: 'Earth',
-    color: [0.22, 0.52, 0.92],
+    color: [0.16, 0.35, 0.64],
     size: 1.05,
     distance: 13,
     rotationSpeed: 0.0011,
-    glow: 4.2,
+    glow: 3.0,
     inclination: 0.12,
     moons: [{ size: 0.26, distance: 2.1, speed: 0.0055, inclination: 0.08 }],
-    detailFrequency: 16,
-    detailStrength: 0.55,
-    bandStrength: 0.5,
-    specularStrength: 0.5,
+    detailFrequency: 22,
+    detailStrength: 0.65,
+    bandStrength: 0.42,
+    specularStrength: 0.58,
   },
   {
     name: 'Mars',
-    color: [0.88, 0.32, 0.18],
-    size: 0.72,
+    color: [0.68, 0.24, 0.14],
+    size: 0.78,
     distance: 18,
     rotationSpeed: 0.0015,
-    glow: 3.1,
+    glow: 2.6,
     inclination: -0.09,
     moons: [{ size: 0.14, distance: 1.8, speed: 0.0065, inclination: 0.14 }],
-    detailFrequency: 18,
-    detailStrength: 0.6,
-    bandStrength: 0.35,
-    specularStrength: 0.32,
+    detailFrequency: 20,
+    detailStrength: 0.72,
+    bandStrength: 0.28,
+    specularStrength: 0.26,
   },
   {
     name: 'Jupiter',
-    color: [0.92, 0.65, 0.42],
-    size: 3.0,
+    color: [0.82, 0.58, 0.42],
+    size: 3.1,
     distance: 25,
     rotationSpeed: 0.00075,
-    glow: 5.8,
+    glow: 4.8,
     inclination: 0.05,
     moons: [
       { size: 0.42, distance: 3.4, speed: 0.0032, inclination: 0.1 },
       { size: 0.2, distance: 4.6, speed: 0.0045, inclination: -0.1 },
     ],
-    rings: { inner: 3.3, outer: 3.7, color: [0.65, 0.55, 0.45, 0.28] },
-    detailFrequency: 26,
-    detailStrength: 0.75,
-    bandStrength: 0.78,
-    specularStrength: 0.5,
+    rings: { inner: 3.4, outer: 3.8, color: [0.55, 0.46, 0.36, 0.34] },
+    detailFrequency: 30,
+    detailStrength: 0.88,
+    bandStrength: 0.82,
+    specularStrength: 0.46,
   },
   {
     name: 'Saturn',
-    color: [0.95, 0.7, 0.28],
-    size: 1.6,
+    color: [0.88, 0.68, 0.38],
+    size: 1.72,
     distance: 32,
     rotationSpeed: 0.0009,
-    glow: 5.0,
+    glow: 4.2,
     inclination: -0.06,
-    rings: { inner: 1.9, outer: 3.4, color: [0.78, 0.62, 0.4, 0.58] },
-    detailFrequency: 30,
-    detailStrength: 0.68,
-    bandStrength: 0.8,
-    specularStrength: 0.46,
+    rings: { inner: 2.0, outer: 3.8, color: [0.92, 0.74, 0.42, 0.72] },
+    detailFrequency: 32,
+    detailStrength: 0.74,
+    bandStrength: 0.86,
+    specularStrength: 0.38,
   },
 ];
 
@@ -237,6 +239,50 @@ void main() {
 
   vec3 finalColor = uColor * detail * lighting + specular;
   gl_FragColor = vec4(finalColor * glow, uAlpha);
+}
+`;
+
+const blackHoleFragment = /* glsl */`
+precision highp float;
+uniform vec3 uColor;
+uniform float uGlow;
+uniform float uTime;
+uniform float uDetailStrength;
+varying vec3 vPosition;
+varying vec3 vWorldPosition;
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  float a = hash(i);
+  float b = hash(i + vec2(1.0, 0.0));
+  float c = hash(i + vec2(0.0, 1.0));
+  float d = hash(i + vec2(1.0, 1.0));
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+}
+
+void main() {
+  float radius = length(vPosition.xy);
+  float eventHorizon = smoothstep(0.85, 0.95, radius);
+  float glowBand = exp(-pow(radius * 2.2, uGlow * 0.12)) * 1.2;
+  float lens = 1.0 - smoothstep(0.6, 1.0, radius);
+
+  vec2 warped = vPosition.xy * (2.4 - radius * 0.9);
+  float swirl = sin(length(warped) * 8.0 - uTime * 2.4);
+  float turbulence = noise(warped * 3.2 + uTime * 0.6);
+
+  vec3 voidColor = vec3(0.01, 0.0, 0.03);
+  vec3 rimColor = mix(uColor, vec3(1.2, 0.45, 0.2), clamp(swirl * 0.35 + turbulence * 0.5, 0.0, 1.0));
+  vec3 lensing = mix(voidColor, rimColor, glowBand);
+
+  float alpha = clamp((1.0 - eventHorizon) * (0.65 + glowBand * 0.35), 0.0, 1.0);
+  alpha *= mix(0.4, 1.0, uDetailStrength);
+  gl_FragColor = vec4(lensing, alpha);
 }
 `;
 
@@ -548,7 +594,7 @@ export default function SolarSystem({
 
       const program = new Program(gl, {
         vertex,
-        fragment,
+        fragment: def.isBlackHole ? blackHoleFragment : fragment,
         uniforms: planetUniforms as unknown as Record<string, { value: any }>,
         transparent: true,
       });
