@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
 import Navigation from '@/components/Navigation';
-import MusicPlayer from '@/components/MusicPlayer';
 import SpaceTheme from '@/components/Theme/SpaceTheme';
 import PremiumSpaceLayout from '@/layouts/PremiumSpaceLayout';
 import AdminRoutesOnly from '@/components/AdminRoutesOnly';
@@ -41,7 +40,6 @@ export default function RootLayout({
           <PremiumSpaceLayout>
             {children}
           </PremiumSpaceLayout>
-          <MusicPlayer src="/music/Interstellar.mp3" autoPlay />
         </SpaceTheme>
       </body>
     </html>

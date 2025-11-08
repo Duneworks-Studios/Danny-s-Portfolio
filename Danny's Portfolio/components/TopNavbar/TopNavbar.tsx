@@ -60,6 +60,9 @@ export default function TopNavbar({ items }: TopNavbarProps) {
           })}
         </div>
         <div className="top-navbar-auth">
+          <span className="top-navbar-badge" aria-label="Lite version notice">
+            LITE VERSION
+          </span>
           <button
             type="button"
             className="top-navbar-auth-button top-navbar-login"

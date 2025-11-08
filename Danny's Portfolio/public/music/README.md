@@ -15,13 +15,10 @@
 
 ## Features
 
-✅ **Auto-play** when website loads  
+✅ **Auto-start** after the entry screen is tapped  
 ✅ **Loop** continuously  
-✅ **Volume control** (0-100%)  
-✅ **Play/Pause** toggle  
-✅ **Mute** button  
-✅ **Expandable player** in bottom-right corner  
-✅ **Visual indicator** when music is playing  
+✅ **Hidden controller** keeps audio running in the background  
+✅ **Graceful fallback** if the browser blocks playback  
 
 ## Browser Compatibility
 
@@ -32,17 +29,17 @@
 
 ## Customization
 
-You can modify the music player by editing:
-- `/components/MusicPlayer.tsx` - Player functionality
-- `/app/layout.tsx` - Music file path and settings
+You can modify the soundtrack controller by editing:
+- `/components/MusicController.tsx` - Audio loading & playback logic
+- `/layouts/PremiumSpaceLayout.tsx` - Entry overlay and trigger behavior
 
 ## Troubleshooting
 
-If music doesn't auto-play:
-1. Some browsers block auto-play until user interaction
-2. Click the music player button to start manually
-3. Check browser console for any errors
-4. Ensure MP3 file is properly uploaded
+If music doesn't start:
+1. Make sure you clicked/tapped the entry overlay (required for most browsers)
+2. Some browsers still block playback—refresh and try again after enabling sound
+3. Check the console for warnings from `MusicController`
+4. Ensure the MP3 file exists and loads without 404 errors
 
 ---
 

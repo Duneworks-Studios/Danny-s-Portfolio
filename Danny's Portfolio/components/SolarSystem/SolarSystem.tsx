@@ -52,96 +52,96 @@ interface PlanetConfig {
 const PLANETS: PlanetConfig[] = [
   {
     name: 'Sun',
-    color: [0.26, 0.08, 0.42],
-    size: 4.8,
+    color: [0.2, 0.2, 0.2],
+    size: 4.6,
     distance: 0,
-    rotationSpeed: 0.00022,
-    glow: 18,
-    detailFrequency: 8,
-    detailStrength: 0.9,
-    bandStrength: 0.8,
-    specularStrength: 0.2,
+    rotationSpeed: 0.00025,
+    glow: 24,
+    detailFrequency: 10,
+    detailStrength: 1.1,
+    bandStrength: 0.92,
+    specularStrength: 0.35,
     isBlackHole: true,
     disk: {
-      inner: 5.6,
-      outer: 14.8,
-      alpha: 0.95,
-      glow: 5.5,
-      color: [1.7, 0.55, 0.28],
-      tilt: 0,
+      inner: 5.4,
+      outer: 15.2,
+      alpha: 0.98,
+      glow: 6.1,
+      color: [1.35, 1.35, 1.35],
+      tilt: 0.04,
     },
   },
   {
     name: 'Mercury',
-    color: [0.58, 0.54, 0.51],
-    size: 0.55,
+    color: [0.46, 0.43, 0.38],
+    size: 0.6,
     distance: 9,
     rotationSpeed: 0.0016,
-    glow: 1.4,
-    detailFrequency: 20,
-    detailStrength: 0.55,
-    bandStrength: 0.12,
-    specularStrength: 0.18,
+    glow: 1.8,
+    detailFrequency: 22,
+    detailStrength: 0.62,
+    bandStrength: 0.18,
+    specularStrength: 0.22,
   },
   {
     name: 'Earth',
-    color: [0.16, 0.35, 0.64],
+    color: [0.14, 0.28, 0.48],
     size: 1.05,
     distance: 13,
     rotationSpeed: 0.0011,
-    glow: 3.0,
+    glow: 3.4,
     inclination: 0.12,
     moons: [{ size: 0.26, distance: 2.1, speed: 0.0055, inclination: 0.08 }],
-    detailFrequency: 22,
-    detailStrength: 0.65,
-    bandStrength: 0.42,
-    specularStrength: 0.58,
+    detailFrequency: 24,
+    detailStrength: 0.72,
+    bandStrength: 0.46,
+    specularStrength: 0.6,
   },
   {
     name: 'Mars',
-    color: [0.68, 0.24, 0.14],
-    size: 0.78,
+    color: [0.62, 0.21, 0.14],
+    size: 0.82,
     distance: 18,
     rotationSpeed: 0.0015,
-    glow: 2.6,
+    glow: 2.9,
     inclination: -0.09,
     moons: [{ size: 0.14, distance: 1.8, speed: 0.0065, inclination: 0.14 }],
-    detailFrequency: 20,
-    detailStrength: 0.72,
-    bandStrength: 0.28,
-    specularStrength: 0.26,
+    detailFrequency: 22,
+    detailStrength: 0.78,
+    bandStrength: 0.34,
+    specularStrength: 0.3,
   },
   {
     name: 'Jupiter',
-    color: [0.82, 0.58, 0.42],
-    size: 3.1,
+    color: [0.78, 0.52, 0.38],
+    size: 3.15,
     distance: 25,
     rotationSpeed: 0.00075,
-    glow: 4.8,
+    glow: 5.6,
     inclination: 0.05,
     moons: [
       { size: 0.42, distance: 3.4, speed: 0.0032, inclination: 0.1 },
       { size: 0.2, distance: 4.6, speed: 0.0045, inclination: -0.1 },
     ],
-    rings: { inner: 3.4, outer: 3.8, color: [0.55, 0.46, 0.36, 0.34] },
-    detailFrequency: 30,
-    detailStrength: 0.88,
-    bandStrength: 0.82,
-    specularStrength: 0.46,
+    rings: { inner: 3.4, outer: 3.9, color: [0.48, 0.42, 0.34, 0.38] },
+    detailFrequency: 32,
+    detailStrength: 0.92,
+    bandStrength: 0.85,
+    specularStrength: 0.5,
   },
   {
     name: 'Saturn',
-    color: [0.88, 0.68, 0.38],
-    size: 1.72,
+    color: [0.84, 0.62, 0.36],
+    size: 1.78,
     distance: 32,
     rotationSpeed: 0.0009,
-    glow: 4.2,
+    glow: 4.6,
     inclination: -0.06,
-    rings: { inner: 2.0, outer: 3.8, color: [0.92, 0.74, 0.42, 0.72] },
-    detailFrequency: 32,
-    detailStrength: 0.74,
-    bandStrength: 0.86,
-    specularStrength: 0.38,
+    rings: { inner: 2.1, outer: 3.9, color: [1.05, 0.86, 0.48, 0.76] },
+    detailFrequency: 34,
+    detailStrength: 0.79,
+    bandStrength: 0.9,
+    specularStrength: 0.42,
   },
 ];
 
@@ -268,21 +268,29 @@ float noise(vec2 p) {
 
 void main() {
   float radius = length(vPosition.xy);
-  float eventHorizon = smoothstep(0.85, 0.95, radius);
-  float glowBand = exp(-pow(radius * 2.2, uGlow * 0.12)) * 1.2;
-  float lens = 1.0 - smoothstep(0.6, 1.0, radius);
+  float horizon = smoothstep(0.72, 0.92, radius);
 
-  vec2 warped = vPosition.xy * (2.4 - radius * 0.9);
-  float swirl = sin(length(warped) * 8.0 - uTime * 2.4);
-  float turbulence = noise(warped * 3.2 + uTime * 0.6);
+  vec2 dir = normalize(vPosition.xy + 1e-5);
+  float lensStrength = pow(max(0.0, 1.4 - radius), 2.5);
+  vec2 lensOffset = dir * lensStrength * 0.8;
+  vec2 warped = vPosition.xy + lensOffset;
 
-  vec3 voidColor = vec3(0.01, 0.0, 0.03);
-  vec3 rimColor = mix(uColor, vec3(1.2, 0.45, 0.2), clamp(swirl * 0.35 + turbulence * 0.5, 0.0, 1.0));
-  vec3 lensing = mix(voidColor, rimColor, glowBand);
+  float swirl = sin(length(warped) * 9.0 - uTime * 2.6);
+  float turbulence = noise(warped * 4.5 + uTime * 0.8);
+  float glow = exp(-pow(radius * 2.3, 2.2)) * (1.0 + uDetailStrength * 0.6);
+  glow += exp(-pow((radius - 0.65) * 5.0, 2.0)) * 0.4;
 
-  float alpha = clamp((1.0 - eventHorizon) * (0.65 + glowBand * 0.35), 0.0, 1.0);
-  alpha *= mix(0.4, 1.0, uDetailStrength);
-  gl_FragColor = vec4(lensing, alpha);
+  float intensity = clamp(glow + swirl * 0.12 + turbulence * 0.18, 0.0, 1.0);
+  vec3 rim = vec3(intensity);
+  vec3 voidColor = vec3(0.0);
+
+  float alpha = clamp((1.0 - horizon) * (0.6 + glow * 0.7), 0.0, 1.0);
+  alpha = pow(alpha, 1.15);
+
+  vec3 finalColor = mix(voidColor, rim, alpha);
+  finalColor = mix(finalColor, vec3(0.98), clamp(glow * 0.4, 0.0, 1.0));
+
+  gl_FragColor = vec4(finalColor, alpha);
 }
 `;
 

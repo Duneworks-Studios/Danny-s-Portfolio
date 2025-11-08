@@ -121,30 +121,6 @@ export default function SpaceLayout({
 
   return (
     <div data-performance-mode={performanceMode}>
-      {!isAdminRoute && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '1rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            background: 'rgba(255, 223, 0, 0.92)',
-            color: '#1f1f1f',
-            padding: '0.35rem 1.1rem',
-            borderRadius: '999px',
-            fontWeight: 700,
-            letterSpacing: '0.04em',
-            textTransform: 'uppercase',
-            fontSize: '0.75rem',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.25)',
-            zIndex: 60,
-          }}
-          aria-label="LITE Version indicator"
-        >
-          LITE Version
-        </div>
-      )}
-
       {/* Background Particles */}
       <Particles
         particleCount={particleCount}
