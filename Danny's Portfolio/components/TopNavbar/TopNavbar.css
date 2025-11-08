@@ -115,6 +115,22 @@
   white-space: nowrap;
 }
 
+.top-navbar-coming {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.88);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
 .top-navbar-auth-group {
   display: flex;
   align-items: center;
@@ -197,6 +213,10 @@
   }
 
   .top-navbar-badge {
+    display: none;
+  }
+
+  .top-navbar-coming {
     display: none;
   }
 

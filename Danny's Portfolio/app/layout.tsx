@@ -1,10 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter, Poppins } from 'next/font/google';
 import './globals.css';
-import Navigation from '@/components/Navigation';
 import SpaceTheme from '@/components/Theme/SpaceTheme';
 import PremiumSpaceLayout from '@/layouts/PremiumSpaceLayout';
-import AdminRoutesOnly from '@/components/AdminRoutesOnly';
 
 const inter = Inter({ 
   subsets: ['latin'],
@@ -33,10 +31,6 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${poppins.variable}`}>
       <body>
         <SpaceTheme>
-          {/* Only show Navigation on admin routes */}
-          <AdminRoutesOnly>
-            <Navigation />
-          </AdminRoutesOnly>
           <PremiumSpaceLayout>
             {children}
           </PremiumSpaceLayout>

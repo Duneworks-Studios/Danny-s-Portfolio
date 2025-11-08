@@ -266,29 +266,53 @@ float noise(vec2 p) {
   return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
 
+float starField(vec2 p, float time) {
+  vec2 cell = floor(p);
+  vec2 local = fract(p) - 0.5;
+  float seed = hash(cell);
+  float rotation = time * 1.3 + seed * 6.2831;
+  mat2 rot = mat2(cos(rotation), -sin(rotation), sin(rotation), cos(rotation));
+  local = rot * local;
+  float dist = length(local + vec2(seed - 0.5) * 0.18);
+  float size = mix(0.16, 0.28, seed);
+  float sparkle = smoothstep(size, size - 0.04, dist);
+  float flicker = 0.6 + 0.4 * sin(time * 5.0 + seed * 20.0);
+  return sparkle * flicker;
+}
+
 void main() {
   float radius = length(vPosition.xy);
   float horizon = smoothstep(0.72, 0.92, radius);
 
   vec2 dir = normalize(vPosition.xy + 1e-5);
-  float lensStrength = pow(max(0.0, 1.4 - radius), 2.5);
-  vec2 lensOffset = dir * lensStrength * 0.8;
-  vec2 warped = vPosition.xy + lensOffset;
+  float lensStrength = pow(max(0.0, 1.35 - radius), 2.8);
+  vec2 swirlDir = vec2(-dir.y, dir.x);
+  vec2 warped = vPosition.xy + dir * lensStrength * 0.75 + swirlDir * (0.12 + 0.18 * uDetailStrength);
 
-  float swirl = sin(length(warped) * 9.0 - uTime * 2.6);
-  float turbulence = noise(warped * 4.5 + uTime * 0.8);
-  float glow = exp(-pow(radius * 2.3, 2.2)) * (1.0 + uDetailStrength * 0.6);
-  glow += exp(-pow((radius - 0.65) * 5.0, 2.0)) * 0.4;
+  float swirl = sin(length(warped) * 9.0 - uTime * 2.8);
+  float turbulence = noise(warped * 5.1 + uTime * 0.8);
+  float glow = exp(-pow(radius * 2.6, 2.1)) * (1.0 + uDetailStrength * 0.7);
+  glow += exp(-pow((radius - 0.58) * 4.0, 1.8)) * 0.55;
 
-  float intensity = clamp(glow + swirl * 0.12 + turbulence * 0.18, 0.0, 1.0);
-  vec3 rim = vec3(0.1 + intensity * 0.4);
+  vec2 starCoords = warped * 7.0 + vec2(uTime * -0.9, uTime * 0.6);
+  float stars = 0.0;
+  stars += starField(starCoords, uTime * 0.6);
+  stars += starField(starCoords * 1.3 + vec2(12.7), uTime * 0.8);
+  stars *= smoothstep(0.95, 0.35, radius);
+
+  float intensity = clamp(glow + swirl * 0.1 + turbulence * 0.16, 0.0, 1.0);
+  vec3 rim = mix(vec3(0.05), vec3(0.35), clamp(glow * 1.25, 0.0, 1.0));
   vec3 voidColor = vec3(0.0);
 
-  float alpha = clamp((1.0 - horizon) * (0.55 + glow * 0.6), 0.0, 1.0);
-  alpha = pow(alpha, 1.2);
+  vec3 starColor = vec3(0.85, 0.9, 1.0) * stars;
+  starColor *= smoothstep(0.15, 0.0, radius - 0.2);
 
-  vec3 finalColor = mix(voidColor, rim, clamp(glow * 1.35, 0.0, 1.0));
-  finalColor = mix(finalColor, vec3(0.02, 0.02, 0.04), 0.45);
+  float alpha = clamp((1.0 - horizon) * (0.6 + glow * 0.55), 0.0, 1.0);
+  alpha = pow(alpha, 1.18);
+
+  vec3 finalColor = mix(voidColor, rim, intensity * 0.65);
+  finalColor = mix(finalColor, vec3(0.01, 0.01, 0.02), 0.6);
+  finalColor += starColor;
   finalColor = clamp(finalColor, 0.0, 1.0);
 
   gl_FragColor = vec4(finalColor, alpha);

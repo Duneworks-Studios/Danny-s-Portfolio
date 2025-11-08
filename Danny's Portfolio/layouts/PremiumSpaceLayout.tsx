@@ -140,6 +140,14 @@ export default function PremiumSpaceLayout({ children }: PremiumSpaceLayoutProps
     <div className="premium-root">
       <div className={stageClassName}>
         <TopNavbar />
+        {!isAdminRoute && (
+          <div className={`full-version-card ${overlayVisible ? 'full-version-card--muted' : ''}`}>
+            <span className="full-version-card__title">Full Version Coming Soon…</span>
+            <p className="full-version-card__copy">
+              Expanded galleries, live admin tools, and interactive experiences are on the horizon.
+            </p>
+          </div>
+        )}
         <Stars starCount={400} parallaxStrength={0.04} twinkle className="stars-monochrome" />
         <Particles
           particleCount={80}

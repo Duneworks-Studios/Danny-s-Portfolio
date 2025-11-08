@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Home, Camera, Code, User, Mail, Palette, Shield } from 'lucide-react';
+import { Home, Camera, Code, User, Mail, Palette } from 'lucide-react';
 import './TopNavbar.css';
 
 interface NavItem {
@@ -63,15 +63,9 @@ export default function TopNavbar({ items }: TopNavbarProps) {
           <span className="top-navbar-badge" aria-label="Lite version notice">
             LITE VERSION
           </span>
-          <button
-            type="button"
-            className="top-navbar-auth-button top-navbar-login"
-            onClick={() => router.push('/admin/login')}
-            aria-label="Admin login"
-          >
-            <Shield size={18} className="top-navbar-icon" />
-            <span>Admin Login</span>
-          </button>
+          <span className="top-navbar-coming" aria-label="Full version coming soon">
+            Full Version Coming Soon…
+          </span>
         </div>
       </div>
     </nav>
