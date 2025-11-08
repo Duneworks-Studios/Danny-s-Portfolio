@@ -41,7 +41,7 @@ export default function RootLayout({
           <PremiumSpaceLayout>
             {children}
           </PremiumSpaceLayout>
-          <MusicPlayer src="/music/Interstellar.mp3" />
+          <MusicPlayer src="/music/Interstellar.mp3" autoPlay />
         </SpaceTheme>
       </body>
     </html>

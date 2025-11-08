@@ -436,7 +436,7 @@ export default function SolarSystem({
   }, [focusPlanet]);
 
   const { scrollYProgress } = useScroll();
-  const scrollZ = useTransform(scrollYProgress, [0, 1], [0, -70]);
+  const scrollZ = useTransform(scrollYProgress, [0, 1], [0, 70]);
   const scrollOrbitBoost = useTransform(scrollYProgress, [0, 1], [1, 1.6]);
   const scrollSceneRotate = useTransform(scrollYProgress, [0, 1], [0, Math.PI * 1.6]);
   const scrollSceneTilt = useTransform(scrollYProgress, [0, 1], [0.08, -0.14]);

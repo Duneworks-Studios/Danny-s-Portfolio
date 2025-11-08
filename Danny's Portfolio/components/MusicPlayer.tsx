@@ -11,7 +11,7 @@ interface MusicPlayerProps {
 }
 
 export default function MusicPlayer({ src, autoPlay = false, loop = true }: MusicPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(autoPlay);
   const [volume, setVolume] = useState(0.3);
   const [isMuted, setIsMuted] = useState(false);
   const [isExpanded, setIsExpanded] = useState(true);
@@ -25,6 +25,11 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceRef = useRef<AudioBufferSourceNode | null>(null);
   const [isSeeking, setIsSeeking] = useState(false);
+  const autoPlayAttemptedRef = useRef(false);
+
+  useEffect(() => {
+    autoPlayAttemptedRef.current = false;
+  }, [src]);
 
   // Initialize Web Audio API
   useEffect(() => {
@@ -60,14 +65,6 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
       audio.removeEventListener('canplaythrough', handleCanPlayThrough);
       audio.removeEventListener('error', handleError);
     };
-  }, [src]);
-
-  // Start paused and wait for user action
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-    audio.pause();
-    setIsPlaying(false);
   }, [src]);
 
   // Define all control functions using useCallback
@@ -225,6 +222,39 @@ export default function MusicPlayer({ src, autoPlay = false, loop = true }: Musi
       audio.removeEventListener('pause', handlePause);
     };
   }, [loop, isSeeking, isLoaded]);
+
+  // Attempt automatic playback when allowed
+  useEffect(() => {
+    if (!autoPlay || autoPlayAttemptedRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const attemptPlay = async () => {
+      autoPlayAttemptedRef.current = true;
+      try {
+        if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+          await audioContextRef.current.resume();
+          console.log('AudioContext resumed (auto-play)');
+        }
+        await audio.play();
+        console.log('Auto-play successful');
+      } catch (error) {
+        console.warn('Auto-play blocked by browser:', error);
+        autoPlayAttemptedRef.current = false;
+      }
+    };
+
+    if (audio.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) {
+      attemptPlay();
+    } else {
+      const handleCanPlay = () => {
+        audio.removeEventListener('canplay', handleCanPlay);
+        attemptPlay();
+      };
+      audio.addEventListener('canplay', handleCanPlay);
+      return () => audio.removeEventListener('canplay', handleCanPlay);
+    }
+  }, [autoPlay, src]);
 
   // Keyboard shortcuts (global Spacebar to play/pause)
   useEffect(() => {
