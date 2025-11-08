@@ -29,6 +29,7 @@ export default function PremiumSpaceLayout({ children }: PremiumSpaceLayoutProps
   const [audioReady, setAudioReady] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
   const [isActivating, setIsActivating] = useState(false);
+  const [hasAttemptedPlayback, setHasAttemptedPlayback] = useState(false);
   const musicRef = useRef<MusicControllerHandle>(null);
   const [hasEntered, setHasEntered] = useState<boolean>(() => {
     if (typeof window === 'undefined') {
@@ -79,21 +80,41 @@ export default function PremiumSpaceLayout({ children }: PremiumSpaceLayoutProps
     }
   }, []);
 
-  const handleEnter = useCallback(async () => {
-    if (!overlayVisible || isActivating) return;
-    setAudioError(null);
-    setIsActivating(true);
+  const tryStartAudio = useCallback(async () => {
+    if (hasEntered || isAdminRoute) {
+      return;
+    }
 
+    const controller = musicRef.current;
+    if (!controller) {
+      finalizeEntry();
+      return;
+    }
+
+    if (!controller.isReady()) {
+      return;
+    }
+
+    if (isActivating) return;
+    setIsActivating(true);
     try {
-      await musicRef.current?.play();
+      setAudioError(null);
+      await controller.play();
+      finalizeEntry();
     } catch (error) {
       setAudioError('Audio playback blocked. Please enable sound and tap again.');
       console.warn('Audio playback failed', error);
     } finally {
-      finalizeEntry();
       setIsActivating(false);
     }
-  }, [overlayVisible, isActivating, finalizeEntry]);
+  }, [finalizeEntry, hasEntered, isAdminRoute, isActivating]);
+
+  const handleEnter = useCallback(() => {
+    if (!overlayVisible || isActivating) return;
+    setHasAttemptedPlayback(true);
+    setAudioError(null);
+    tryStartAudio();
+  }, [overlayVisible, isActivating, tryStartAudio]);
 
   const handleOverlayKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -105,6 +126,13 @@ export default function PremiumSpaceLayout({ children }: PremiumSpaceLayoutProps
     },
     [overlayVisible, handleEnter]
   );
+
+  useEffect(() => {
+    if (!hasAttemptedPlayback) return;
+    if (hasEntered || isAdminRoute) return;
+    if (!audioReady) return;
+    tryStartAudio();
+  }, [hasAttemptedPlayback, hasEntered, isAdminRoute, audioReady, tryStartAudio]);
 
   const stageClassName = `premium-stage${overlayVisible ? ' is-pre-entry' : ''}`;
 

@@ -281,14 +281,15 @@ void main() {
   glow += exp(-pow((radius - 0.65) * 5.0, 2.0)) * 0.4;
 
   float intensity = clamp(glow + swirl * 0.12 + turbulence * 0.18, 0.0, 1.0);
-  vec3 rim = vec3(intensity);
+  vec3 rim = vec3(0.1 + intensity * 0.4);
   vec3 voidColor = vec3(0.0);
 
-  float alpha = clamp((1.0 - horizon) * (0.6 + glow * 0.7), 0.0, 1.0);
-  alpha = pow(alpha, 1.15);
+  float alpha = clamp((1.0 - horizon) * (0.55 + glow * 0.6), 0.0, 1.0);
+  alpha = pow(alpha, 1.2);
 
-  vec3 finalColor = mix(voidColor, rim, alpha);
-  finalColor = mix(finalColor, vec3(0.98), clamp(glow * 0.4, 0.0, 1.0));
+  vec3 finalColor = mix(voidColor, rim, clamp(glow * 1.35, 0.0, 1.0));
+  finalColor = mix(finalColor, vec3(0.02, 0.02, 0.04), 0.45);
+  finalColor = clamp(finalColor, 0.0, 1.0);
 
   gl_FragColor = vec4(finalColor, alpha);
 }
