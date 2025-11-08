@@ -298,20 +298,20 @@ void main() {
   float stars = 0.0;
   stars += starField(starCoords, uTime * 0.6);
   stars += starField(starCoords * 1.3 + vec2(12.7), uTime * 0.8);
-  stars *= smoothstep(0.95, 0.35, radius);
+  stars *= smoothstep(1.05, 0.3, radius);
 
-  float intensity = clamp(glow + swirl * 0.1 + turbulence * 0.16, 0.0, 1.0);
-  vec3 rim = mix(vec3(0.05), vec3(0.35), clamp(glow * 1.25, 0.0, 1.0));
+  float intensity = clamp(glow + swirl * 0.12 + turbulence * 0.2, 0.0, 1.0);
+  vec3 rim = mix(vec3(0.01), vec3(0.22, 0.3, 0.44), clamp(glow * 1.6, 0.0, 1.0));
   vec3 voidColor = vec3(0.0);
 
   vec3 starColor = vec3(0.85, 0.9, 1.0) * stars;
-  starColor *= smoothstep(0.15, 0.0, radius - 0.2);
+  starColor *= smoothstep(0.12, 0.0, radius - 0.18);
 
-  float alpha = clamp((1.0 - horizon) * (0.6 + glow * 0.55), 0.0, 1.0);
-  alpha = pow(alpha, 1.18);
+  float alpha = clamp((1.0 - horizon) * (0.5 + glow * 0.6), 0.0, 1.0);
+  alpha = pow(alpha, 1.25);
 
-  vec3 finalColor = mix(voidColor, rim, intensity * 0.65);
-  finalColor = mix(finalColor, vec3(0.01, 0.01, 0.02), 0.6);
+  vec3 finalColor = mix(voidColor, rim, intensity * 0.55);
+  finalColor = mix(finalColor, vec3(0.004, 0.006, 0.012), 0.72);
   finalColor += starColor;
   finalColor = clamp(finalColor, 0.0, 1.0);
 
@@ -490,6 +490,7 @@ interface SolarSystemProps {
   enabled?: boolean;
   showMoons?: boolean;
   showRings?: boolean;
+  explosionMode?: boolean;
 }
 
 export default function SolarSystem({
@@ -497,11 +498,17 @@ export default function SolarSystem({
   enabled = true,
   showMoons = true,
   showRings = true,
+  explosionMode = false,
 }: SolarSystemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
+  const explosionModeRef = useRef(explosionMode);
+
+  useEffect(() => {
+    explosionModeRef.current = explosionMode;
+  }, [explosionMode]);
 
   const focusPlanet = useMemo<SpaceBodyName>(() => {
     const path = pathname || '/';
@@ -607,6 +614,7 @@ export default function SolarSystem({
       uniforms: {
         uTime: { value: number };
       } & Record<string, { value: any }>;
+      explosionDir: { x: number; y: number; z: number };
     };
 
     const planets: PlanetInstance[] = [];
@@ -648,6 +656,14 @@ export default function SolarSystem({
 
       sceneRoot.addChild(mesh);
 
+      const explosionTheta = Math.random() * Math.PI * 2;
+      const explosionPhi = Math.random() * Math.PI;
+      const explosionDir = {
+        x: Math.sin(explosionPhi) * Math.cos(explosionTheta),
+        y: Math.cos(explosionPhi) * 0.45,
+        z: Math.sin(explosionPhi) * Math.sin(explosionTheta),
+      };
+
       const planet: PlanetInstance = {
         def,
         mesh,
@@ -655,6 +671,7 @@ export default function SolarSystem({
         moons: [],
         disk: undefined,
         uniforms: planetUniforms as unknown as PlanetInstance['uniforms'],
+        explosionDir,
       };
 
       if (def.disk) {
@@ -810,12 +827,60 @@ export default function SolarSystem({
           planet.uniforms.uTime.value = timeSeconds;
         }
 
+        let baseX = planet.mesh.position.x;
+        let baseZ = planet.mesh.position.z;
+
         if (!reduceMotion && planet.def.distance > 0) {
           planet.orbitAngle += planet.def.rotationSpeed * delta * 0.05 * scrollOrbitMultiplier;
           const radius = planet.def.distance;
-          planet.mesh.position.x = Math.cos(planet.orbitAngle) * radius;
-          planet.mesh.position.z = Math.sin(planet.orbitAngle) * radius;
+          baseX = Math.cos(planet.orbitAngle) * radius;
+          baseZ = Math.sin(planet.orbitAngle) * radius;
         }
+
+        const diskAlphaUniform = planet.disk?.program.uniforms?.uAlpha as { value: number } | undefined;
+        const ringAlphaUniform = planet.ring?.program.uniforms?.uAlpha as { value: number } | undefined;
+
+        const explosionActive = explosionModeRef.current && !isMobile;
+        const planetScaleTarget = explosionActive ? 1.6 : 1;
+        const scaleEase = 0.08;
+        const currentScale = planet.mesh.scale.x;
+        const newScale = currentScale + (planetScaleTarget - currentScale) * scaleEase;
+        planet.mesh.scale.set(newScale, newScale, newScale);
+
+        if (explosionActive) {
+          const blast = 0.4 + (Math.sin(timeSeconds * 1.4 + planet.orbitAngle) + 1) * 0.45;
+          const spreadBase = Math.max(4, planet.def.distance * 0.6);
+          baseX += planet.explosionDir.x * spreadBase * blast;
+          planet.mesh.position.y = planet.explosionDir.y * spreadBase * blast;
+          baseZ += planet.explosionDir.z * spreadBase * blast;
+
+          if (planet.uniforms?.uAlpha) {
+            planet.uniforms.uAlpha.value = Math.max(0.12, 0.7 - blast * 0.55);
+          }
+          if (diskAlphaUniform) {
+            diskAlphaUniform.value = Math.max(0.08, 0.6 - blast * 0.45);
+          }
+
+          if (ringAlphaUniform) {
+            ringAlphaUniform.value = Math.max(0.05, 0.4 - blast * 0.3);
+          }
+        } else {
+          planet.mesh.position.y += (0 - planet.mesh.position.y) * 0.1;
+          if (planet.uniforms?.uAlpha) {
+            planet.uniforms.uAlpha.value += (1 - planet.uniforms.uAlpha.value) * 0.05;
+          }
+          if (diskAlphaUniform) {
+            const targetDiskAlpha = planet.def.disk?.alpha ?? 0.9;
+            diskAlphaUniform.value += (targetDiskAlpha - diskAlphaUniform.value) * 0.05;
+          }
+          if (ringAlphaUniform) {
+            const targetAlpha = planet.def.rings?.color[3] ?? 0.4;
+            ringAlphaUniform.value += (targetAlpha - ringAlphaUniform.value) * 0.05;
+          }
+        }
+
+        planet.mesh.position.x = baseX;
+        planet.mesh.position.z = baseZ;
 
         planet.mesh.rotation.y += 0.001 * delta;
 

@@ -60,6 +60,10 @@ export default function PremiumSpaceLayout({ children }: PremiumSpaceLayoutProps
   }, [hasEntered, isAdminRoute]);
 
   const overlayVisible = !hasEntered && !isAdminRoute;
+  const explosionActive = useMemo(
+    () => pathname.startsWith('/photography') || pathname.startsWith('/renders'),
+    [pathname]
+  );
   const backgroundsActive = isAdminRoute ? true : hasEntered;
   const solarDetailsActive = isAdminRoute ? true : hasEntered;
 
@@ -160,6 +164,7 @@ export default function PremiumSpaceLayout({ children }: PremiumSpaceLayoutProps
           enabled={backgroundsActive}
           showMoons={solarDetailsActive}
           showRings={solarDetailsActive}
+          explosionMode={explosionActive}
         />
         <div className="content-area" style={{ marginTop: 0 }} aria-hidden={overlayVisible}>
           {children}
