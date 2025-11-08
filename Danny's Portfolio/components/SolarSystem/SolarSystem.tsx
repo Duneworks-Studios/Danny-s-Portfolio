@@ -408,9 +408,17 @@ function createRing(gl: OGLRenderingContext, inner = 1.2, outer = 2.0, segments 
 
 interface SolarSystemProps {
   className?: string;
+  enabled?: boolean;
+  showMoons?: boolean;
+  showRings?: boolean;
 }
 
-export default function SolarSystem({ className = '' }: SolarSystemProps) {
+export default function SolarSystem({
+  className = '',
+  enabled = true,
+  showMoons = true,
+  showRings = true,
+}: SolarSystemProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef<number | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -442,6 +450,10 @@ export default function SolarSystem({ className = '' }: SolarSystemProps) {
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const container = containerRef.current;
     if (!container) return;
 
@@ -593,7 +605,7 @@ export default function SolarSystem({ className = '' }: SolarSystemProps) {
         planet.disk = { mesh: diskMesh, program: diskProgram };
       }
 
-      if (def.rings) {
+      if (showRings && def.rings) {
         const ringProgram = new Program(gl, {
           vertex,
           fragment,
@@ -622,7 +634,7 @@ export default function SolarSystem({ className = '' }: SolarSystemProps) {
         planet.ring = ringMesh;
       }
 
-      if (def.moons) {
+      if (showMoons && def.moons) {
         for (const moon of def.moons) {
           const moonProgram = new Program(gl, {
             vertex,
@@ -831,7 +843,7 @@ export default function SolarSystem({ className = '' }: SolarSystemProps) {
         container.removeChild(gl.canvas);
       }
     };
-  }, [isMobile, scrollZ, scrollOrbitBoost, scrollSceneRotate, scrollSceneTilt, scrollSceneLift]);
+  }, [enabled, showMoons, showRings, isMobile, scrollZ, scrollOrbitBoost, scrollSceneRotate, scrollSceneTilt, scrollSceneLift]);
 
   return (
     <div
